@@ -1,36 +1,56 @@
-const bpmInput = document.getElementById('bpm');
-const bpmValue = document.getElementById('bpm-value');
-const togglePlayButton = document.getElementById('toggle-play');
-const statusLabel = document.getElementById('status');
-const trackCrash = document.getElementById('track-crash');
-const trackKick = document.getElementById('track-kick');
-const trackHihat = document.getElementById('track-hihat');
-const trackSnare = document.getElementById('track-snare');
+const exercises = Array.from(document.querySelectorAll('.exercise')).map((section) => {
+  const bpmInput = section.querySelector('[data-role="bpm"]');
+  const bpmValue = section.querySelector('[data-role="bpm-value"]');
+  const togglePlayButton = section.querySelector('[data-role="toggle"]');
+  const statusLabel = section.querySelector('[data-role="status"]');
+  const tracks = {
+    crash: section.querySelector('[data-track="crash"]'),
+    kick: section.querySelector('[data-track="kick"]'),
+    hihat: section.querySelector('[data-track="hihat"]'),
+    snare: section.querySelector('[data-track="snare"]'),
+    beat: section.querySelector('[data-track="beat"]'),
+    metronome: section.querySelector('[data-track="metronome"]'),
+  };
+  const metronomeOptions = {
+    placement: section.querySelector('[data-role="placement"]'),
+    beat: section.querySelector('[data-role="beat"]'),
+    interval: section.querySelector('[data-role="interval"]'),
+  };
+
+  return {
+    section,
+    key: section.dataset.exercise,
+    bpmInput,
+    bpmValue,
+    togglePlayButton,
+    statusLabel,
+    tracks,
+    metronomeOptions,
+    isPlaying: false,
+    currentStep: 0,
+    nextNoteTime: 0,
+    scheduleTimer: null,
+    state: {
+      bpm: Number(bpmInput.value),
+    },
+  };
+});
+
+const tabs = Array.from(document.querySelectorAll('.tab'));
 
 let audioContext = null;
 let masterGain = null;
 let noiseBuffer = null;
 
-let isPlaying = false;
-let currentStep = 0;
-let nextNoteTime = 0;
-let scheduleTimer = null;
-
 const lookahead = 25;
 const scheduleAheadTime = 0.12;
 
-const state = {
-  bpm: Number(bpmInput.value),
+const updateStatus = (exercise, text) => {
+  exercise.statusLabel.textContent = text;
 };
 
-bpmValue.textContent = String(state.bpm);
-
-const updateStatus = (text) => {
-  statusLabel.textContent = text;
-};
-
-const secondsPerBeat = () => 60 / state.bpm;
-const stepDuration = () => secondsPerBeat() / 4;
+const secondsPerBeat = (exercise) => 60 / exercise.state.bpm;
+const stepDuration = (exercise) => secondsPerBeat(exercise) / 4;
 
 const ensureAudioContext = () => {
   if (!audioContext) {
@@ -122,67 +142,162 @@ const playCrash = (time) => {
   bufferSource.stop(time + 0.65);
 };
 
-const scheduleStep = (step, time) => {
-  if (trackKick.checked && step % 4 === 0) {
+const playWoodblock = (time) => {
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  const filter = audioContext.createBiquadFilter();
+  oscillator.type = 'square';
+  oscillator.frequency.setValueAtTime(950, time);
+  filter.type = 'bandpass';
+  filter.frequency.value = 1200;
+  filter.Q.value = 8;
+  gain.gain.setValueAtTime(0.25, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+  oscillator.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  oscillator.start(time);
+  oscillator.stop(time + 0.14);
+};
+
+const scheduleNoire = (exercise, step, time) => {
+  if (exercise.tracks.kick?.checked && step % 4 === 0) {
     playKick(time);
   }
 
-  if (trackCrash.checked && step % 16 === 0) {
+  if (exercise.tracks.crash?.checked && step % 16 === 0) {
     playCrash(time);
   }
 
-  if (trackHihat.checked) {
+  if (exercise.tracks.hihat?.checked) {
     const positionInBar = step % 16;
     if (positionInBar === 4 || positionInBar === 12) {
       playHihat(time);
     }
   }
 
-  if (trackSnare.checked && step % 6 === 0) {
+  if (exercise.tracks.snare?.checked && step % 6 === 0) {
     playSnare(time);
   }
 };
 
-const scheduler = () => {
-  while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
-    scheduleStep(currentStep, nextNoteTime);
-    nextNoteTime += stepDuration();
-    currentStep += 1;
+const scheduleMetronome = (exercise, step, time) => {
+  if (exercise.tracks.beat?.checked) {
+    if (step % 4 === 0) {
+      playKick(time);
+    }
+
+    const positionInBar = step % 16;
+    if (positionInBar === 4 || positionInBar === 12) {
+      playHihat(time);
+    }
+  }
+
+  if (exercise.tracks.snare?.checked && step % 6 === 0) {
+    playSnare(time);
+  }
+
+  if (exercise.tracks.metronome?.checked && step % 4 === 0) {
+    const beatSelection = Number(exercise.metronomeOptions.beat?.value || 1) - 1;
+    const interval = Number(exercise.metronomeOptions.interval?.value || 1);
+    const measureIndex = Math.floor(step / 16);
+    const beatIndex = Math.floor((step % 16) / 4);
+    if (beatIndex === beatSelection && measureIndex % interval === 0) {
+      const placement = exercise.metronomeOptions.placement?.value || 'debut';
+      const beatLength = secondsPerBeat(exercise);
+      let offset = 0;
+      if (placement === 'binaire') {
+        offset = beatLength / 2;
+      } else if (placement === 'ternaire') {
+        offset = (beatLength * 2) / 3;
+      }
+      playWoodblock(time + offset);
+    }
   }
 };
 
-const startPlayback = async () => {
+const scheduleStep = (exercise, step, time) => {
+  if (exercise.key === 'noire') {
+    scheduleNoire(exercise, step, time);
+  } else {
+    scheduleMetronome(exercise, step, time);
+  }
+};
+
+const scheduler = (exercise) => {
+  while (exercise.nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
+    scheduleStep(exercise, exercise.currentStep, exercise.nextNoteTime);
+    exercise.nextNoteTime += stepDuration(exercise);
+    exercise.currentStep += 1;
+  }
+};
+
+const startPlayback = async (exercise) => {
   ensureAudioContext();
   if (audioContext.state === 'suspended') {
     await audioContext.resume();
   }
-  currentStep = 0;
-  nextNoteTime = audioContext.currentTime + 0.05;
-  scheduleTimer = setInterval(scheduler, lookahead);
-  isPlaying = true;
-  togglePlayButton.textContent = 'Stop';
-  updateStatus('Lecture en cours');
+  exercise.currentStep = 0;
+  exercise.nextNoteTime = audioContext.currentTime + 0.05;
+  exercise.scheduleTimer = setInterval(() => scheduler(exercise), lookahead);
+  exercise.isPlaying = true;
+  exercise.togglePlayButton.textContent = 'Stop';
+  updateStatus(exercise, 'Lecture en cours');
 };
 
-const stopPlayback = () => {
-  clearInterval(scheduleTimer);
-  scheduleTimer = null;
-  isPlaying = false;
-  togglePlayButton.textContent = 'Démarrer';
-  updateStatus('Arrêté');
+const stopPlayback = (exercise) => {
+  if (exercise.scheduleTimer) {
+    clearInterval(exercise.scheduleTimer);
+  }
+  exercise.scheduleTimer = null;
+  exercise.isPlaying = false;
+  exercise.togglePlayButton.textContent = 'Démarrer';
+  updateStatus(exercise, 'Arrêté');
 };
 
-bpmInput.addEventListener('input', (event) => {
-  state.bpm = Number(event.target.value) || 120;
-  bpmValue.textContent = String(state.bpm);
+const stopAll = () => {
+  exercises.forEach((exercise) => {
+    if (exercise.isPlaying) {
+      stopPlayback(exercise);
+    }
+  });
+};
+
+const setActiveExercise = (targetKey) => {
+  stopAll();
+  exercises.forEach((exercise) => {
+    const isActive = exercise.key === targetKey;
+    exercise.section.classList.toggle('is-active', isActive);
+    exercise.section.setAttribute('aria-hidden', String(!isActive));
+  });
+  tabs.forEach((tab) => {
+    const isActive = tab.dataset.target === targetKey;
+    tab.classList.toggle('is-active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+  });
+};
+
+exercises.forEach((exercise) => {
+  exercise.bpmValue.textContent = String(exercise.state.bpm);
+
+  exercise.bpmInput.addEventListener('input', (event) => {
+    exercise.state.bpm = Number(event.target.value) || 120;
+    exercise.bpmValue.textContent = String(exercise.state.bpm);
+  });
+
+  exercise.togglePlayButton.addEventListener('click', () => {
+    if (!exercise.isPlaying) {
+      startPlayback(exercise);
+    } else {
+      stopPlayback(exercise);
+    }
+  });
 });
 
-togglePlayButton.addEventListener('click', () => {
-  if (!isPlaying) {
-    startPlayback();
-  } else {
-    stopPlayback();
-  }
+tabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    setActiveExercise(tab.dataset.target);
+  });
 });
 
 window.addEventListener('beforeunload', () => {

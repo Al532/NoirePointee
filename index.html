@@ -8,40 +8,109 @@
 </head>
 <body>
   <main class="app">
-    <header>
-      <h1>Travail de noires pointées</h1>
-      <p>Activez ou désactivez chaque instrument.</p>
-    </header>
+    <nav class="tabs" role="tablist" aria-label="Exercices">
+      <button class="tab is-active" type="button" role="tab" aria-selected="true" data-target="noire">Noire pointée</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-target="metronome">Métronome</button>
+    </nav>
 
-    <section class="controls">
-      <div class="control-row">
-        <label for="bpm">Tempo (BPM)</label>
-        <input id="bpm" type="range" min="40" max="250" step="1" value="120" />
-        <span id="bpm-value" class="bpm-value">120</span>
-      </div>
-      <div class="control-row">
-        <button id="toggle-play" class="primary">Démarrer</button>
-        <span id="status" class="status">Prêt</span>
-      </div>
+    <section class="exercise is-active" data-exercise="noire" role="tabpanel">
+      <header>
+        <h1>Travail de noires pointées</h1>
+        <p>Activez ou désactivez chaque instrument.</p>
+      </header>
+
+      <section class="controls">
+        <div class="control-row">
+          <label for="bpm-noire">Tempo (BPM)</label>
+          <input id="bpm-noire" type="range" min="40" max="250" step="1" value="120" data-role="bpm" />
+          <span class="bpm-value" data-role="bpm-value">120</span>
+        </div>
+        <div class="control-row">
+          <button class="primary" type="button" data-role="toggle">Démarrer</button>
+          <span class="status" data-role="status">Prêt</span>
+        </div>
+      </section>
+
+      <section class="tracks">
+        <label class="track">
+          <input type="checkbox" checked data-track="crash" />
+          <span class="track-name">Mesure (crash)</span>
+        </label>
+        <label class="track">
+          <input type="checkbox" checked data-track="kick" />
+          <span class="track-name">Temps (kick)</span>
+        </label>
+        <label class="track">
+          <input type="checkbox" checked data-track="hihat" />
+          <span class="track-name">2 et 4 (charley)</span>
+        </label>
+        <label class="track">
+          <input type="checkbox" checked data-track="snare" />
+          <span class="track-name">Noires pointées (caisse claire)</span>
+        </label>
+      </section>
     </section>
 
-    <section class="tracks">
-      <label class="track">
-        <input id="track-crash" type="checkbox" checked />
-        <span class="track-name">Mesure (crash)</span>
-      </label>
-      <label class="track">
-        <input id="track-kick" type="checkbox" checked />
-        <span class="track-name">Temps (kick)</span>
-      </label>
-      <label class="track">
-        <input id="track-hihat" type="checkbox" checked />
-        <span class="track-name">2 et 4 (charley)</span>
-      </label>
-      <label class="track">
-        <input id="track-snare" type="checkbox" checked />
-        <span class="track-name">Noires pointées (caisse claire)</span>
-      </label>
+    <section class="exercise" data-exercise="metronome" role="tabpanel" aria-hidden="true">
+      <header>
+        <h1>Exercice : Métronome</h1>
+        <p>Choisissez le placement du métronome et activez les instruments.</p>
+      </header>
+
+      <section class="controls">
+        <div class="control-row">
+          <label for="bpm-metronome">Tempo (BPM)</label>
+          <input id="bpm-metronome" type="range" min="40" max="250" step="1" value="120" data-role="bpm" />
+          <span class="bpm-value" data-role="bpm-value">120</span>
+        </div>
+        <div class="control-row">
+          <button class="primary" type="button" data-role="toggle">Démarrer</button>
+          <span class="status" data-role="status">Prêt</span>
+        </div>
+      </section>
+
+      <section class="tracks">
+        <label class="track">
+          <input type="checkbox" checked data-track="beat" />
+          <span class="track-name">Beat (kick + charleston)</span>
+        </label>
+        <label class="track">
+          <input type="checkbox" checked data-track="snare" />
+          <span class="track-name">Noires pointées (caisse claire)</span>
+        </label>
+        <label class="track track-metronome">
+          <input type="checkbox" checked data-track="metronome" />
+          <span class="track-name">Métronome (woodblock)</span>
+          <div class="track-options">
+            <label class="select-group">
+              <span>Placement</span>
+              <select data-role="placement">
+                <option value="debut">début</option>
+                <option value="binaire">2e croche (binaire)</option>
+                <option value="ternaire">3e croche (ternaire)</option>
+              </select>
+            </label>
+            <label class="select-group">
+              <span>Temps</span>
+              <select data-role="beat">
+                <option value="1">1er</option>
+                <option value="2">2e</option>
+                <option value="3">3e</option>
+                <option value="4">4e</option>
+              </select>
+            </label>
+            <label class="select-group">
+              <span>Mesures</span>
+              <select data-role="interval">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="8">8</option>
+              </select>
+            </label>
+          </div>
+        </label>
+      </section>
     </section>
   </main>
 
