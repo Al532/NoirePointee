@@ -16,7 +16,8 @@
     <section class="controls">
       <div class="control-row">
         <label for="bpm">Tempo (BPM)</label>
-        <input id="bpm" type="number" min="40" max="240" step="1" value="120" />
+        <input id="bpm" type="range" min="40" max="250" step="1" value="120" />
+        <span id="bpm-value" class="bpm-value">120</span>
       </div>
       <div class="control-row">
         <button id="toggle-play" class="primary">Démarrer</button>

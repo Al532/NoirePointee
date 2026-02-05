@@ -1,4 +1,5 @@
 const bpmInput = document.getElementById('bpm');
+const bpmValue = document.getElementById('bpm-value');
 const togglePlayButton = document.getElementById('toggle-play');
 const statusLabel = document.getElementById('status');
 const trackKick = document.getElementById('track-kick');
@@ -20,6 +21,8 @@ const scheduleAheadTime = 0.12;
 const state = {
   bpm: Number(bpmInput.value),
 };
+
+bpmValue.textContent = String(state.bpm);
 
 const updateStatus = (text) => {
   statusLabel.textContent = text;
@@ -68,7 +71,7 @@ const playHihat = (time) => {
   bufferSource.buffer = noiseBuffer;
   filter.type = 'highpass';
   filter.frequency.value = 7000;
-  gain.gain.setValueAtTime(0.3, time);
+  gain.gain.setValueAtTime(0.38, time);
   gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
   bufferSource.connect(filter);
   filter.connect(gain);
@@ -81,14 +84,14 @@ const playSnare = (time) => {
   const noiseSource = audioContext.createBufferSource();
   noiseSource.buffer = noiseBuffer;
   const noiseGain = audioContext.createGain();
-  noiseGain.gain.setValueAtTime(0.45, time);
+  noiseGain.gain.setValueAtTime(0.35, time);
   noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
 
   const oscillator = audioContext.createOscillator();
   oscillator.type = 'triangle';
   oscillator.frequency.setValueAtTime(220, time);
   const toneGain = audioContext.createGain();
-  toneGain.gain.setValueAtTime(0.2, time);
+  toneGain.gain.setValueAtTime(0.16, time);
   toneGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
 
   noiseSource.connect(noiseGain);
@@ -102,9 +105,29 @@ const playSnare = (time) => {
   oscillator.stop(time + 0.13);
 };
 
+const playCrash = (time) => {
+  const bufferSource = audioContext.createBufferSource();
+  bufferSource.buffer = noiseBuffer;
+  const filter = audioContext.createBiquadFilter();
+  filter.type = 'highpass';
+  filter.frequency.value = 3000;
+  const gain = audioContext.createGain();
+  gain.gain.setValueAtTime(0.5, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.6);
+  bufferSource.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  bufferSource.start(time);
+  bufferSource.stop(time + 0.65);
+};
+
 const scheduleStep = (step, time) => {
   if (trackKick.checked && step % 4 === 0) {
     playKick(time);
+  }
+
+  if (step % 16 === 0) {
+    playCrash(time);
   }
 
   if (trackHihat.checked) {
@@ -150,6 +173,7 @@ const stopPlayback = () => {
 
 bpmInput.addEventListener('input', (event) => {
   state.bpm = Number(event.target.value) || 120;
+  bpmValue.textContent = String(state.bpm);
 });
 
 togglePlayButton.addEventListener('click', () => {
