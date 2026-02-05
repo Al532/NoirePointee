@@ -32,6 +32,9 @@ const exercises = Array.from(document.querySelectorAll('.exercise')).map((sectio
     scheduleTimer: null,
     state: {
       bpm: Number(bpmInput.value),
+      metronome: {
+        lastMeasureIndex: null,
+      },
     },
   };
 });
@@ -202,7 +205,13 @@ const scheduleMetronome = (exercise, step, time) => {
     const interval = Number(exercise.metronomeOptions.interval?.value || 1);
     const measureIndex = Math.floor(step / 16);
     const beatIndex = Math.floor((step % 16) / 4);
-    if (beatIndex === beatSelection && measureIndex % interval === 0) {
+    if (exercise.state.metronome.lastMeasureIndex === null) {
+      exercise.state.metronome.lastMeasureIndex = measureIndex - interval;
+    }
+    if (
+      beatIndex === beatSelection
+      && measureIndex - exercise.state.metronome.lastMeasureIndex >= interval
+    ) {
       const placement = exercise.metronomeOptions.placement?.value || 'debut';
       const beatLength = secondsPerBeat(exercise);
       let offset = 0;
@@ -212,6 +221,7 @@ const scheduleMetronome = (exercise, step, time) => {
         offset = (beatLength * 2) / 3;
       }
       playWoodblock(time + offset);
+      exercise.state.metronome.lastMeasureIndex = measureIndex;
     }
   }
 };
@@ -239,6 +249,7 @@ const startPlayback = async (exercise) => {
   }
   exercise.currentStep = 0;
   exercise.nextNoteTime = audioContext.currentTime + 0.05;
+  exercise.state.metronome.lastMeasureIndex = null;
   exercise.scheduleTimer = setInterval(() => scheduler(exercise), lookahead);
   exercise.isPlaying = true;
   exercise.togglePlayButton.textContent = 'Stop';
