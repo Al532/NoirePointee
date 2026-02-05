@@ -1,0 +1,132 @@
+:root {
+  color-scheme: dark;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  background: #0f1115;
+  color: #f2f4f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.app {
+  max-width: 720px;
+  width: 100%;
+  background: #171a21;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+}
+
+header p {
+  margin: 0 0 24px;
+  color: #b5bdc9;
+}
+
+.controls {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+label {
+  font-weight: 600;
+}
+
+input[type="number"] {
+  background: #0f1115;
+  color: #f2f4f8;
+  border: 1px solid #2c3340;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  width: 120px;
+}
+
+.primary {
+  background: #5d7cff;
+  color: #f2f4f8;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(93, 124, 255, 0.3);
+}
+
+.status {
+  font-size: 0.95rem;
+  color: #9ba4b5;
+}
+
+.tracks {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0f1115;
+  border: 1px solid #242b36;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.track input {
+  width: 18px;
+  height: 18px;
+}
+
+.track-name {
+  font-weight: 600;
+}
+
+.tips {
+  background: #10141c;
+  border-radius: 16px;
+  padding: 16px 20px;
+  color: #c6ccd8;
+}
+
+.tips h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.tips ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.tips li {
+  margin: 6px 0;
+}

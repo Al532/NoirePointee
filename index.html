@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rythmes Superposés</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Combinaisons de rythmes</h1>
+      <p>Activez ou désactivez chaque couche, tout reste parfaitement synchronisé.</p>
+    </header>
+
+    <section class="controls">
+      <div class="control-row">
+        <label for="bpm">Tempo (BPM)</label>
+        <input id="bpm" type="number" min="40" max="240" step="1" value="120" />
+      </div>
+      <div class="control-row">
+        <button id="toggle-play" class="primary">Démarrer</button>
+        <span id="status" class="status">Prêt</span>
+      </div>
+    </section>
+
+    <section class="tracks">
+      <label class="track">
+        <input id="track-kick" type="checkbox" checked />
+        <span class="track-name">Kick - Tous les temps</span>
+      </label>
+      <label class="track">
+        <input id="track-hihat" type="checkbox" checked />
+        <span class="track-name">Charleston - Temps 2 et 4</span>
+      </label>
+      <label class="track">
+        <input id="track-snare" type="checkbox" checked />
+        <span class="track-name">Caisse claire - Noires pointées</span>
+      </label>
+    </section>
+
+    <section class="tips">
+      <h2>Synchronisation fluide</h2>
+      <ul>
+        <li>Planification audio anticipée pour éviter les lags.</li>
+        <li>Le tempo peut être ajusté en temps réel.</li>
+        <li>Les trois couches restent alignées sur la grille.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
