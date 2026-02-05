@@ -54,6 +54,19 @@ label {
   font-weight: 600;
 }
 
+input[type="range"] {
+  flex: 1;
+  min-width: 220px;
+  accent-color: #5d7cff;
+}
+
+.bpm-value {
+  min-width: 40px;
+  text-align: right;
+  font-weight: 600;
+  color: #f2f4f8;
+}
+
 input[type="number"] {
   background: #0f1115;
   color: #f2f4f8;
