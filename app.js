@@ -274,7 +274,7 @@ const stopAll = () => {
   });
 };
 
-const setActiveExercise = (targetKey) => {
+const setActiveExercise = (targetKey, { shouldPersist = true } = {}) => {
   stopAll();
   exercises.forEach((exercise) => {
     const isActive = exercise.key === targetKey;
@@ -286,6 +286,9 @@ const setActiveExercise = (targetKey) => {
     tab.classList.toggle('is-active', isActive);
     tab.setAttribute('aria-selected', String(isActive));
   });
+  if (shouldPersist) {
+    localStorage.setItem('lastExercise', targetKey);
+  }
 };
 
 exercises.forEach((exercise) => {
@@ -310,6 +313,16 @@ tabs.forEach((tab) => {
     setActiveExercise(tab.dataset.target);
   });
 });
+
+const storedExercise = localStorage.getItem('lastExercise');
+const availableKeys = exercises.map((exercise) => exercise.key);
+const initialKey = availableKeys.includes(storedExercise)
+  ? storedExercise
+  : tabs.find((tab) => tab.classList.contains('is-active'))?.dataset.target;
+
+if (initialKey) {
+  setActiveExercise(initialKey, { shouldPersist: false });
+}
 
 window.addEventListener('beforeunload', () => {
   if (audioContext) {
